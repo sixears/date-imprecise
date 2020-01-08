@@ -39,9 +39,6 @@ import Data.Function.Unicode  ( (∘) )
 -- boundedn ----------------------------
 
 import BoundedN  ( 𝕎, pattern 𝕎, 𝕨 )
-import FromI     ( FromI( fromI, fromI', __fromI' ) )
-import ToNum     ( ToNum( toNum, toNumW16 ) )
-
 
 -- data-default ------------------------
 
@@ -60,6 +57,10 @@ import Data.MoreUnicode.Lens     ( (⊩) )
 import Data.MoreUnicode.Monad    ( (≫) )
 import Data.MoreUnicode.Natural  ( ℕ )
 import Data.MoreUnicode.Tasty    ( (≟) )
+
+-- number ------------------------------
+
+import Number  ( FromI( fromI, fromI', __fromI' ), ToNum( toNum, toNumW16 ) )
 
 -- quasiquoting ------------------------
 

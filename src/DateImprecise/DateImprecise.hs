@@ -35,11 +35,6 @@ import System.IO      ( IO )
 
 import Data.Eq.Unicode  ( (≡) )
 
--- boundedn ----------------------------
-
-import FromI  ( __fromI )
-import ToNum  ( toNum )
-
 -- data-default ------------------------
 
 import Data.Default  ( def )
@@ -61,6 +56,10 @@ import Data.MoreUnicode.Natural  ( ℕ )
 -- mtl ---------------------------------
 
 import Control.Monad.Except  ( MonadError )
+
+-- number ------------------------------
+
+import Number  ( __fromI, toNum )
 
 -- quasiquoting ------------------------
 

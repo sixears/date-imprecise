@@ -34,11 +34,6 @@ import Text.Show           ( Show )
 
 import Data.Function.Unicode  ( (∘) )
 
--- boundedn ----------------------------
-
-import FromI  ( fromI, __fromI )
-import ToNum  ( ToNum( toNum, toNumW8, toNumW16 ) )
-
 -- data-textual ------------------------
 
 import Data.Textual  ( Parsed( Parsed, Malformed ), Printable( print )
@@ -50,6 +45,10 @@ import Data.MoreUnicode.Applicative  ( (⊵), (⋪) )
 import Data.MoreUnicode.Functor      ( (⊳) )
 import Data.MoreUnicode.Natural      ( ℕ )
 import Data.MoreUnicode.Tasty        ( (≟) )
+
+-- number ------------------------------
+
+import Number  ( ToNum( toNum, toNumW8, toNumW16 ), fromI, __fromI )
 
 -- parsec-plus -------------------------
 

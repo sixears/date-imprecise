@@ -17,14 +17,14 @@ import Data.String    ( String )
 import System.Exit    ( ExitCode )
 import System.IO      ( IO )
 
--- boundedn ----------------------------
-
-import FromI  ( fromI' )
-
 -- more-unicode ------------------------
 
 import Data.MoreUnicode.Natural  ( ℕ )
 import Data.MoreUnicode.Tasty    ( (≟) )
+
+-- number ------------------------------
+
+import Number  ( fromI' )
 
 -- tasty -------------------------------
 
