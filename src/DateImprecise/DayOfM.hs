@@ -21,16 +21,17 @@ import Prelude  ( Integer, Integral, (+), (-), error, fromInteger, toInteger )
 
 -- base --------------------------------
 
-import Control.Monad  ( fail, return )
-import Data.Eq        ( Eq )
-import Data.Function  ( ($), (&) )
-import Data.Maybe     ( Maybe( Just, Nothing ), maybe )
-import Data.Ord       ( Ord )
-import Data.String    ( String )
-import System.Exit    ( ExitCode )
-import System.IO      ( IO )
-import Text.Read      ( readMaybe )
-import Text.Show      ( Show )
+import Control.Monad       ( return )
+import Control.Monad.Fail  ( MonadFail( fail ) )
+import Data.Eq             ( Eq )
+import Data.Function       ( ($), (&) )
+import Data.Maybe          ( Maybe( Just, Nothing ), maybe )
+import Data.Ord            ( Ord )
+import Data.String         ( String )
+import System.Exit         ( ExitCode )
+import System.IO           ( IO )
+import Text.Read           ( readMaybe )
+import Text.Show           ( Show )
 
 -- base-unicode-symbols ----------------
 
@@ -56,7 +57,6 @@ import Data.MoreUnicode.Functor  ( (⊳), (⩺) )
 import Data.MoreUnicode.Lens     ( (⊩) )
 import Data.MoreUnicode.Monad    ( (≫) )
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- number ------------------------------
 
@@ -76,11 +76,11 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( assertAnyException, propInvertibleText
+import TastyPlus  ( (≟), assertAnyException, propInvertibleText
                   , runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
@@ -93,6 +93,10 @@ import Language.Haskell.TH         ( ExpQ, Lit( IntegerL ), Pat( ConP, LitP )
                                    , PatQ )
 import Language.Haskell.TH.Quote   ( QuasiQuoter )
 import Language.Haskell.TH.Syntax  ( Lift )
+
+-- text-parser-combinators -------------
+
+import qualified Text.Parser.Combinators as PC
 
 -- text-printer ------------------------
 
@@ -135,15 +139,15 @@ dayOfMPrintableTests =
 instance Textual DayOfM where
   textual = do
     m ← nnUpTo Decimal 2
-    maybe (fail $ [fmt|bad day value %d|] m) return $ fromI' m
+    maybe (PC.unexpected $ [fmt|bad day value %d|] m) return $ fromI' m
 
 dayOfMTextualTests ∷ TestTree
 dayOfMTextualTests =
   testGroup "Textual"
-            [ testCase "12" $ Just (__fromI' 12) ≟ fromText @DayOfM "12"
-            , testCase  "0" $ Nothing @DayOfM    ≟ fromText  "0"
-            , testCase "32" $ Nothing @DayOfM    ≟ fromText "32"
-            , testCase "31" $ Just (__fromI' 31) ≟ fromText @DayOfM "31"
+            [ testCase "12" $ Just (__fromI' 12) @=? fromText @DayOfM "12"
+            , testCase  "0" $ Nothing @DayOfM    @=? fromText  "0"
+            , testCase "32" $ Nothing @DayOfM    @=? fromText "32"
+            , testCase "31" $ Just (__fromI' 31) @=? fromText @DayOfM "31"
             , testProperty "invertibleText" (propInvertibleText @DayOfM)
             ]
 

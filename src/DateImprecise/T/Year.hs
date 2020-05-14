@@ -20,7 +20,6 @@ import System.IO      ( IO )
 -- more-unicode ------------------------
 
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- number ------------------------------
 
@@ -32,7 +31,7 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( assertBool, testCase )
+import Test.Tasty.HUnit  ( (@=?), assertBool, testCase )
 
 -- tasty-plus --------------------------
 
@@ -52,7 +51,7 @@ yearTests =
               [year|2017|] → True
               _            → False
       bool s x = testCase s $ assertBool s x
-  in testGroup "year" [ testCase "Year 2017" $ fromI' 2017 ≟ Just [year|2017|]
+  in testGroup "year" [ testCase "Year 2017" $ fromI' 2017 @=? Just [year|2017|]
                       , bool "pattern Year 2017" (t [year|2017|])
                       , bool "pattern ! Year 2016" (not $ t [year|2016|])
                       ]

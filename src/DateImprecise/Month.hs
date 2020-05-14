@@ -60,7 +60,6 @@ import Data.MoreUnicode.Functor  ( (⊳), (⩺) )
 import Data.MoreUnicode.Lens     ( (⊩) )
 import Data.MoreUnicode.Monad    ( (≫) )
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- number ------------------------------
 
@@ -80,11 +79,11 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( assertAnyException, propInvertibleText
+import TastyPlus  ( (≟), assertAnyException, propInvertibleText
                   , runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
@@ -97,6 +96,10 @@ import Language.Haskell.TH         ( ExpQ, Lit( IntegerL ), Pat( ConP, LitP )
                                    , PatQ )
 import Language.Haskell.TH.Quote   ( QuasiQuoter )
 import Language.Haskell.TH.Syntax  ( Lift )
+
+-- text-parser-combinators -------------
+
+import qualified Text.Parser.Combinators as PC
 
 -- text-printer ------------------------
 
@@ -138,14 +141,14 @@ monthPrintableTests =
 instance Textual Month where
   textual = do
     m ← nnUpTo Decimal 2
-    maybe (fail $ [fmt|bad month value %d|] m) return $ fromI' m
+    maybe (PC.unexpected $ [fmt|bad month value %d|] m) return $ fromI' m
 
 monthTextualTests ∷ TestTree
 monthTextualTests =
   testGroup "Textual"
-            [ testCase "12" $ Just (__fromI' 12) ≟ fromText @Month "12"
-            , testCase  "0" $ Nothing @Month     ≟ fromText  "0"
-            , testCase "13" $ Nothing @Month     ≟ fromText "13"
+            [ testCase "12" $ Just (__fromI' 12) @=? fromText @Month "12"
+            , testCase  "0" $ Nothing @Month     @=? fromText  "0"
+            , testCase "13" $ Nothing @Month     @=? fromText "13"
             , testProperty "invertibleText" (propInvertibleText @Month)
             ]
 

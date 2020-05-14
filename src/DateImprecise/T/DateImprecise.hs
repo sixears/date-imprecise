@@ -18,7 +18,6 @@ import System.IO      ( IO )
 -- more-unicode ------------------------
 
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- tasty -------------------------------
 
@@ -30,7 +29,7 @@ import Test.Tasty.HUnit  ( testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( runTestsP, runTestsReplay, runTestTree )
+import TastyPlus  ( (≟), runTestsP, runTestsReplay, runTestTree )
 
 -- time --------------------------------
 

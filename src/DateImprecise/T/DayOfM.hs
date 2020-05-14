@@ -20,7 +20,6 @@ import System.IO      ( IO )
 -- more-unicode ------------------------
 
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- number ------------------------------
 
@@ -32,7 +31,7 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( assertBool, testCase )
+import Test.Tasty.HUnit  ( (@=?), assertBool, testCase )
 
 -- tasty-plus --------------------------
 
@@ -52,7 +51,7 @@ dayOfMTests =
               [dayOfM|7|] → True
               _          → False
       bool s x = testCase s $ assertBool s x
-  in testGroup "dayOfM" [ testCase "DayOfM 7" $ fromI' 7 ≟ Just [dayOfM|7|]
+  in testGroup "dayOfM" [ testCase "DayOfM 7" $ fromI' 7 @=? Just [dayOfM|7|]
                         , bool "pattern DayOfM 7" (t [dayOfM|7|])
                         , bool "pattern ! DayOfM 6" (not $ t [dayOfM|6|])
                         ]

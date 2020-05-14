@@ -23,7 +23,7 @@ where
 
 -- base --------------------------------
 
-import Control.Monad  ( Monad, fail, return )
+import Control.Monad  ( Monad, return )
 import Data.Either    ( Either( Left, Right ) )
 import Data.Function  ( ($), (&) )
 import Data.Maybe     ( Maybe( Just, Nothing ) )
@@ -77,6 +77,10 @@ import TastyPlus  ( runTestsP, runTestsReplay, runTestTree )
 
 import Language.Haskell.TH.Quote  ( QuasiQuoter )
 
+-- text-parser-combinators -------------
+
+import qualified Text.Parser.Combinators as PC
+
 -- time --------------------------------
 
 import Data.Time  ( Day, toGregorian )
@@ -118,9 +122,9 @@ dateDay' y m dom = let uncurry3 ∷ (α → β → γ → δ) → (α,β,γ) →
 
 ----------
 
-dateDayM ∷ Monad η ⇒ Year → Month → DayOfM → η DateImprecise
+dateDayM ∷ (Monad η, PC.Parsing η) ⇒ Year → Month → DayOfM → η DateImprecise
 dateDayM y m d = case dateDay' y m d of
-                   Left  e → fail $ toString e
+                   Left  e → PC.unexpected $ toString e
                    Right r → return r
 
 --------------------

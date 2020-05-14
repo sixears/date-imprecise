@@ -25,7 +25,8 @@ import Data.Aeson.Types  ( Value( Number, String ), typeMismatch )
 
 -- base --------------------------------
 
-import Control.Monad       ( Monad, fail, return )
+import Control.Monad       ( Monad, return )
+import Control.Monad.Fail  ( MonadFail( fail ) )
 import Data.Bifunctor      ( bimap )
 import Data.Bool           ( Bool( False, True ), otherwise )
 import Data.Either         ( Either( Left, Right ) )
@@ -64,7 +65,7 @@ import Data.MoreUnicode.Applicative  ( (⊵), (⋪) )
 import Data.MoreUnicode.Functor      ( (⊳), (⩺) )
 import Data.MoreUnicode.Lens         ( (⊩) )
 import Data.MoreUnicode.Natural      ( ℕ )
-import Data.MoreUnicode.Tasty        ( (≟), (≣) )
+import Data.MoreUnicode.Tasty        ( (≣) )
 
 -- mtl ---------------------------------
 
@@ -96,11 +97,11 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( propInvertibleText, runTestsP, runTestsReplay, runTestTree )
+import TastyPlus  ( (≟), propInvertibleText, runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
 
@@ -114,6 +115,10 @@ import Language.Haskell.TH.Syntax  ( Lift )
 -- text --------------------------------
 
 import Data.Text  ( Text, pack )
+
+-- text-parser-combinators -------------
+
+import qualified Text.Parser.Combinators as PC
 
 -- text-printer ------------------------
 
@@ -174,30 +179,30 @@ dateImpreciseR' ∷ MonadError DateErrorImprecise η ⇒
 dateImpreciseR' = dateImpreciseR
 
 {- | Create a `DateImpreciseRange` from two dates; else call `Monad.fail`. -}
-dateImpreciseRM ∷ Monad η ⇒ DateImprecise → DateImprecise → η DateImpreciseRange
+dateImpreciseRM ∷ (Monad η, PC.Parsing η) ⇒ DateImprecise → DateImprecise → η DateImpreciseRange
 dateImpreciseRM start end =
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 dateImpreciseRangeTests ∷ TestTree
 dateImpreciseRangeTests =
   testGroup "dateImpreciseRange"
             [ testCase "2019-11-14:2019-11-26" $
-                  Right testDateImpreciseRange
-                ≟ dateImpreciseR @DateErrorImprecise testDateP0 testDateP1
+                    Right testDateImpreciseRange
+                @=? dateImpreciseR @DateErrorImprecise testDateP0 testDateP1
             , testCase "2019-11-26:2019-11-14" $
-                  Left (dateRangeError_ testDateP1 testDateP0)
-                ≟ dateImpreciseR @DateErrorImprecise testDateP1 testDateP0
+                    Left (dateRangeError_ testDateP1 testDateP0)
+                @=? dateImpreciseR @DateErrorImprecise testDateP1 testDateP0
             , testCase "2019-11-14:2019-11-14" $
-                  Right (DateImpreciseRange (testDateP0, testDateP0))
-                ≟ dateImpreciseR @DateErrorImprecise testDateP0 testDateP0
+                    Right (DateImpreciseRange (testDateP0, testDateP0))
+                @=? dateImpreciseR @DateErrorImprecise testDateP0 testDateP0
             , testCase "2019:2019" $
-                  Right (DateImpreciseRange (testDatePY1, testDatePY1))
-                ≟ dateImpreciseR @DateErrorImprecise testDatePY1 testDatePY1
+                    Right (DateImpreciseRange (testDatePY1, testDatePY1))
+                @=? dateImpreciseR @DateErrorImprecise testDatePY1 testDatePY1
             , testCase "2019:2017" $
-                  Left (dateRangeError_ testDatePY1 testDatePY0)
-                ≟ dateImpreciseR @DateErrorImprecise testDatePY1 testDatePY0
+                    Left (dateRangeError_ testDatePY1 testDatePY0)
+                @=? dateImpreciseR @DateErrorImprecise testDatePY1 testDatePY0
             ]
 
 ----------------------------------------
@@ -254,7 +259,7 @@ instance Parsecable DateImpreciseRange where
 
 dateImpreciseRangeParsecableTests ∷ TestTree
 dateImpreciseRangeParsecableTests =
-  let check s dpr = testCase s $ Right dpr ≟ parsec' (""∷Text) s
+  let check s dpr = testCase s $ Right dpr @=? parsec' (""∷Text) s
    in testGroup "Parsecable"
                 [ check "2019-11-14:2019-11-26" testDateImpreciseRange
                 , check "2019-11-14:26"         testDateImpreciseRange
@@ -278,7 +283,7 @@ dateImpreciseRangeParsecableTests =
 
 ----------------------------------------
 
-dateImpreciseMM ∷ Monad η ⇒ (DateImprecise,DateImprecise) → η DateImpreciseRange
+dateImpreciseMM ∷ (Monad η, PC.Parsing η) ⇒ (DateImprecise,DateImprecise) → η DateImpreciseRange
 dateImpreciseMM = uncurry dateImpreciseRM
 
 ----------
@@ -297,12 +302,12 @@ parseD = do
 
 --------------------
 
-dateImpreciseYMDD ∷ Monad η ⇒ (Year,Month,DayOfM,DayOfM) → η DateImpreciseRange
+dateImpreciseYMDD ∷ (Monad η, PC.Parsing η) ⇒ (Year,Month,DayOfM,DayOfM) → η DateImpreciseRange
 dateImpreciseYMDD (y,m,d0,d1) = do
   start ← dateDayM y m d0
   end   ← dateDayM y m d1
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
@@ -315,13 +320,13 @@ parseYMDD = do
 
 --------------------
 
-dateImpreciseYMMDD ∷ Monad η ⇒
+dateImpreciseYMMDD ∷ (Monad η, PC.Parsing η) ⇒
                      (Year,Month,DayOfM,Month,DayOfM) → η DateImpreciseRange
 dateImpreciseYMMDD (y,m0,d0,m1,d1) = do
   start ← dateDayM y m0 d0
   end   ← dateDayM y m1 d1
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
@@ -335,12 +340,12 @@ parseYMMDD = do
 
 --------------------
 
-dateImpreciseYMM ∷ Monad η ⇒ (Year,Month,Month) → η DateImpreciseRange
+dateImpreciseYMM ∷ (Monad η, PC.Parsing η) ⇒ (Year,Month,Month) → η DateImpreciseRange
 dateImpreciseYMM (y,m0,m1) = do
   let start = dateMonth y m0
   let end   = dateMonth y m1
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
@@ -352,12 +357,12 @@ parseYMM = do
 
 --------------------
 
-dateImpreciseYMMD ∷ Monad η ⇒ (Year,Month,Month,DayOfM) → η DateImpreciseRange
+dateImpreciseYMMD ∷ (Monad η, PC.Parsing η) ⇒ (Year,Month,Month,DayOfM) → η DateImpreciseRange
 dateImpreciseYMMD (y,m0,m1,d1) = do
   let start = dateMonth y m0
   end ← dateDayM y m1 d1
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
@@ -371,12 +376,12 @@ parseYMMD = do
 
 --------------------
 
-dateImpreciseYMD ∷ Monad η ⇒ (Year,Month,DayOfM) → η DateImpreciseRange
+dateImpreciseYMD ∷ (Monad η, PC.Parsing η) ⇒ (Year,Month,DayOfM) → η DateImpreciseRange
 dateImpreciseYMD (y,m1,d1) = do
   let start = dateYear y
   end ← dateDayM y m1 d1
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
@@ -389,17 +394,17 @@ parseYMD = do
 
 --------------------
 
-dateImpreciseYM ∷ Monad η ⇒ (Year,Month) → η DateImpreciseRange
+dateImpreciseYM ∷ (Monad η, PC.Parsing η) ⇒ (Year,Month) → η DateImpreciseRange
 dateImpreciseYM (y,m) = do
   let start = dateYear y
       end   = dateMonth y m
   case dateImpreciseR @DateErrorImprecise start end of
-    Left  e → fail $ show e
+    Left  e → PC.unexpected $ show e
     Right r → return r
 
 ----------
 
-parseYM ∷ (Monad η, CharParsing η) ⇒ η DateImpreciseRange
+parseYM ∷ (Monad η, PC.Parsing η, CharParsing η) ⇒ η DateImpreciseRange
 parseYM = do
   (y,m) ← (,) ⊳ textual ⋪ string ":" ⊵ textual
   dateImpreciseYM (y,m)
@@ -414,7 +419,7 @@ instance Textual DateImpreciseRange where
 
 dateImpreciseRangeTextualTests ∷ TestTree
 dateImpreciseRangeTextualTests =
-  let check s d = testCase s $ Just d ≟ fromString s
+  let check s d = testCase s $ Just d @=? fromString s
    in testGroup "Textual"
                 [ check "2019-11-14:2019-11-26" testDateImpreciseRange
                 , check "2019-11-14:26"         testDateImpreciseRange
@@ -465,7 +470,7 @@ instance FromJSON DateImpreciseRange where
 
 dateImpreciseRangeFromJSONTests ∷ TestTree
 dateImpreciseRangeFromJSONTests =
-  let check s d = testCase s $ Right d ≟ unYaml' @YamlParseError s
+  let check s d = testCase s $ Right d @=? unYaml' @YamlParseError s
    in testGroup "FromJSON"
                 [ check "2019-11-14:2019-11-26" testDateImpreciseRange
                 , check "2019-11-14:26"         testDateImpreciseRange
@@ -497,7 +502,7 @@ instance ToJSON DateImpreciseRange where
 
 dateImpreciseRangeToJSONTests ∷ TestTree
 dateImpreciseRangeToJSONTests =
-  let check s d = testCase s $ String (pack s) ≟ toJSON d
+  let check s d = testCase s $ String (pack s) @=? toJSON d
    in testGroup "ToJSON"
                 [ check "2019-11-14:26"         testDateImpreciseRange
                 , check "2017-11-26:2019-11-26" testDateImpreciseRange1
@@ -533,8 +538,8 @@ instance DayBounds DateImpreciseRange where
 
 dayBoundsTests ∷ TestTree
 dayBoundsTests =
-  let checkS y m o d = testCase "startDay" $ fromGregorian y m o ≟ startDay d
-      checkE y m o d = testCase "endDay"   $ fromGregorian y m o ≟ endDay d
+  let checkS y m o d = testCase "startDay" $ fromGregorian y m o @=? startDay d
+      checkE y m o d = testCase "endDay"   $ fromGregorian y m o @=? endDay d
       check  y0 m0 d0 y1 m1 d1 d = testGroup (toString d) $ [ checkS y0 m0 d0 d
                                                             , checkE y1 m1 d1 d ]
    in testGroup "DayBounds"
@@ -586,7 +591,7 @@ generalizeTests =
                               DateImpreciseRange (g0,g1) = generalize d
                            in testCase ([fmt|%T:%T -> %T:%T (%T:%T)|]
                                              d0 d1    r0 r1  g0 g1) $
-                                  (r0,r1) ≟ (g0,g1)
+                                  (r0,r1) @=? (g0,g1)
    in testGroup "generalize"
                 [ check [dateImprecise|2019|]       [dateImprecise|2019-01|]
                         [dateImprecise|2019-01-01|] [dateImprecise|2019-01-31|]
@@ -668,10 +673,10 @@ mergeTests =
                                     e = DateImpreciseRange (e0,e1)
                                  in testCase (toString d) $
                                         Just (DateImpreciseRange (r0,r1))
-                                      ≟ merge d e
+                                      @=? merge d e
       checkNon d0 d1 e0 e1 = let d = DateImpreciseRange (d0,d1)
                                  e = DateImpreciseRange (e0,e1)
-                              in testCase (toString d) $ Nothing ≟ merge d e
+                              in testCase (toString d) $ Nothing @=? merge d e
 
       mergeProp r r' = let m = merge r r'
                         in case m of

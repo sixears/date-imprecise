@@ -44,7 +44,6 @@ import Data.Textual  ( Parsed( Parsed, Malformed ), Printable( print )
 import Data.MoreUnicode.Applicative  ( (⊵), (⋪) )
 import Data.MoreUnicode.Functor      ( (⊳) )
 import Data.MoreUnicode.Natural      ( ℕ )
-import Data.MoreUnicode.Tasty        ( (≟) )
 
 -- number ------------------------------
 
@@ -72,11 +71,11 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( propInvertibleText, runTestsP, runTestsReplay, runTestTree )
+import TastyPlus  ( (≟), propInvertibleText, runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
 
@@ -220,7 +219,7 @@ instance Textual DateImprecise where
 
 textualTests ∷ TestTree
 textualTests =
-  let check s d = testCase s $ Just d ≟ fromString s
+  let check s d = testCase s $ Just d @=? fromString s
    in testGroup "Textual"
             [ check "2019-11-14" testDateImprecise
             , check "2019-11" testDateImpreciseM
@@ -241,7 +240,7 @@ parsecableTests =
       testDateImpreciseString  = "2019-11-14" ∷ String
       testDateImpreciseMString = "2019-11" ∷ String
       testDateImpreciseYString = "2019" ∷ String
-      check s d = testCase s $ Right d ≟ parsec' @DateImprecise nn s
+      check s d = testCase s $ Right d @=? parsec' @DateImprecise nn s
    in testGroup "Parsecable"
                 [ check testDateImpreciseString  testDateImprecise
                 , check testDateImpreciseMString testDateImpreciseM
@@ -267,11 +266,11 @@ fromJSONTests ∷ TestTree
 fromJSONTests =
   testGroup "FromJSON"
             [ testCase "2019-11-14" $
-                Right testDateImprecise  ≟ unYaml @YamlParseError "2019-11-14"
+                Right testDateImprecise  @=? unYaml @YamlParseError "2019-11-14"
             , testCase "2019-11" $
-                Right testDateImpreciseM ≟ unYaml @YamlParseError "2019-11"
+                Right testDateImpreciseM @=? unYaml @YamlParseError "2019-11"
             , testCase "2019" $
-                Right testDateImpreciseY ≟ unYaml @YamlParseError "2019"
+                Right testDateImpreciseY @=? unYaml @YamlParseError "2019"
             ]
 
 ----------------------------------------
@@ -283,7 +282,7 @@ instance ToJSON DateImprecise where
 
 toJSONTests ∷ TestTree
 toJSONTests =
-  let check s d = testCase s $ String (pack s) ≟ toJSON d
+  let check s d = testCase s $ String (pack s) @=? toJSON d
    in testGroup "ToJSON" [ check "2019-11-14" testDateImprecise
                          , check "2019-11"    testDateImpreciseM
                          , check "2019"       testDateImpreciseY
@@ -312,17 +311,17 @@ dayBoundsTests ∷ TestTree
 dayBoundsTests =
   testGroup "DayBounds"
             [ testCase "startDay 2019-11-14" $
-                  fromGregorian 2019 11 14 ≟ startDay testDateImprecise
+                  fromGregorian 2019 11 14 @=? startDay testDateImprecise
             , testCase "endDay 2019-11-14" $
-                  fromGregorian 2019 11 14 ≟ endDay testDateImprecise
+                  fromGregorian 2019 11 14 @=? endDay testDateImprecise
             , testCase "startDay 2019-11" $
-                  fromGregorian 2019 11 01 ≟ startDay testDateImpreciseM
+                  fromGregorian 2019 11 01 @=? startDay testDateImpreciseM
             , testCase "endDay 2019-11" $
-                  fromGregorian 2019 11 30 ≟ endDay testDateImpreciseM
+                  fromGregorian 2019 11 30 @=? endDay testDateImpreciseM
             , testCase "startDay 2019" $
-                  fromGregorian 2019 01 01 ≟ startDay testDateImpreciseY
+                  fromGregorian 2019 01 01 @=? startDay testDateImpreciseY
             , testCase "endDay 2019" $
-                  fromGregorian 2019 12 31 ≟ endDay testDateImpreciseY
+                  fromGregorian 2019 12 31 @=? endDay testDateImpreciseY
             ]
 
 -- testing ---------------------------------------------------------------------

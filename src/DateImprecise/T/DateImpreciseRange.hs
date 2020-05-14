@@ -19,7 +19,6 @@ import System.IO      ( IO )
 -- more-unicode ------------------------
 
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- tasty -------------------------------
 
@@ -27,7 +26,7 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
@@ -61,11 +60,11 @@ qqTests =
       d2 = dateImpreciseR' d0s d0s
    in testGroup "dateImpreciseRangeQQ"
                 [ testCase "DateImpreciseRange 2019-12-24" $
-                    d0 ≟ Right [dateImpreciseRange|2019:12-24|]
+                    d0 @=? Right [dateImpreciseRange|2019:12-24|]
                 , testCase "DateImpreciseRange 2019-12" $
-                    d1 ≟ Right [dateImpreciseRange|2017:2019-12|]
+                    d1 @=? Right [dateImpreciseRange|2017:2019-12|]
                 , testCase "DateImpreciseRange 2019" $
-                    d2 ≟ Right [dateImpreciseRange|2019|]
+                    d2 @=? Right [dateImpreciseRange|2019|]
             ]
 
 --------------------------------------------------------------------------------

@@ -56,7 +56,6 @@ import Data.MoreUnicode.Functor  ( (⊳), (⩺) )
 import Data.MoreUnicode.Lens     ( (⊩) )
 import Data.MoreUnicode.Monad    ( (≫) )
 import Data.MoreUnicode.Natural  ( ℕ )
-import Data.MoreUnicode.Tasty    ( (≟) )
 
 -- number ------------------------------
 
@@ -81,11 +80,11 @@ import Test.Tasty  ( TestTree, testGroup )
 
 -- tasty-hunit -------------------------
 
-import Test.Tasty.HUnit  ( testCase )
+import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( assertAnyException, propInvertibleText
+import TastyPlus  ( (≟),assertAnyException, propInvertibleText
                   , runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
@@ -98,6 +97,10 @@ import Language.Haskell.TH         ( ExpQ, Lit( IntegerL ), Pat( ConP, LitP )
                                    , PatQ )
 import Language.Haskell.TH.Quote   ( QuasiQuoter )
 import Language.Haskell.TH.Syntax  ( Lift )
+
+-- text-parser-combinators -------------
+
+import qualified Text.Parser.Combinators as PC
 
 -- text-printer ------------------------
 
@@ -139,13 +142,13 @@ yearPrintableTests =
 instance Textual Year where
   textual = do
     y ← read ⊳ count 4 digit
-    maybe (fail $ [fmt|bad year value %d|] y) return $ fromI' y
+    maybe (PC.unexpected $ [fmt|bad year value %d|] y) return $ fromI' y
 
 yearTextualTests ∷ TestTree
 yearTextualTests =
   testGroup "Textual"
-            [ testCase "2014" $ Just (__fromI' 2014) ≟ fromText @Year "2014"
-            , testCase "2019" $ Just (__fromI' 2019) ≟ fromText @Year "2019"
+            [ testCase "2014" $ Just (__fromI' 2014) @=? fromText @Year "2014"
+            , testCase "2019" $ Just (__fromI' 2019) @=? fromText @Year "2019"
             , testProperty "invertibleText" (propInvertibleText @Year)
             ]
 
