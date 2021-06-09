@@ -7,7 +7,7 @@
 
 module DateImprecise.DateImpreciseType
   ( DateImprecise(..), cdayToDate, dateDay_, dateMonth, dateYear, endDateOfMonth
-  , tests ) 
+  , tests )
 where
 
 import Prelude  ( Float, Integer, Integral, toInteger )
@@ -141,7 +141,7 @@ instance Lift DateImprecise where
                                              (litI dom))
   lift (DateMonth (y,m)) = do y' ← lift y
                               m' ← lift m
-                              return $ AppE (ConE 'DateMonth) (TupE [ y', m' ])
+                              return $ AppE (ConE 'DateMonth) (TupE [ Just y', Just m' ])
   lift (DateYear y) = do y' ← lift y
                          return $ AppE (ConE 'DateYear) y'
 

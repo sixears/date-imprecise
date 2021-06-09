@@ -73,7 +73,7 @@ import Control.Monad.Except  ( MonadError )
 
 -- parsec-plus -------------------------
 
-import ParsecPlus  ( Parsecable( parser ), parsec' )
+import ParsecPlus  ( Parsecable( parser ), ParseError, parsec )
 
 -- parser-plus -------------------------
 
@@ -259,7 +259,8 @@ instance Parsecable DateImpreciseRange where
 
 dateImpreciseRangeParsecableTests ∷ TestTree
 dateImpreciseRangeParsecableTests =
-  let check s dpr = testCase s $ Right dpr @=? parsec' (""∷Text) s
+  let check ∷ String → DateImpreciseRange → TestTree
+      check s dpr = testCase s $ Right dpr @=? parsec @_ @ParseError (""∷Text) s
    in testGroup "Parsecable"
                 [ check "2019-11-14:2019-11-26" testDateImpreciseRange
                 , check "2019-11-14:26"         testDateImpreciseRange
