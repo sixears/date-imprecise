@@ -1,3 +1,7 @@
+1.0.1.0 2023-12-14
+==================
+- support TH in ghc9
+
 1.0.0.3 2021-06-09
 ==================
 - update for Language.Haskell.TH changing TupE to take `Maybe`s

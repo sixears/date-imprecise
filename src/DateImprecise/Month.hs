@@ -164,7 +164,7 @@ readYI = toInteger ∘ toNumW16 ⩺ readY
 -- λ> runQ [p| Month_ (W 1) |]
 -- ConP DateImprecise.Month.Month_ [ConP MInfo.BoundedN.W [LitP (IntegerL 1)]]
 monthPat ∷ Integer → Pat
-monthPat i = ConP 'Month_ [ConP '𝕎 [LitP (IntegerL (i-1))]]
+monthPat i = ConP 'Month_ [] [ConP '𝕎 [] [LitP (IntegerL (i-1))]]
 
 monthQQ ∷ String → Maybe ExpQ
 monthQQ = (\ m → ⟦m⟧) ⩺ readY
@@ -175,17 +175,20 @@ monthQQP s = maybe (fail $ [fmt|failed to parse month '%s'|] s)
 
 month ∷ QuasiQuoter
 month = mkQQ "Month" $ def & exp ⊩ monthQQ & pat ⊩ monthQQP
-                                                     
+
 ----------------------------------------
 
 pattern Month ∷ Integral α ⇒ α → Month
 pattern Month i ← ((+1) ∘ toNum ∘ unMonth → i)
+{-# COMPLETE Month #-}
+
 -- not bi-directional, because Month i would be partial (would fail on
 -- out-of-bounds values)
 --                  where Month i = __fromI i
 {- | Short-name convenience alias for `pattern Month` -}
 pattern M ∷ Integral α ⇒ α → Month
 pattern M i ← ((+1) ∘ toNum ∘ unMonth → i)
+{-# COMPLETE M #-}
 
 monthPatternTests ∷ TestTree
 monthPatternTests =

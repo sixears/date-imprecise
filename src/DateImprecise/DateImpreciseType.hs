@@ -37,7 +37,7 @@ import Data.Function.Unicode  ( (∘) )
 -- data-textual ------------------------
 
 import Data.Textual  ( Parsed( Parsed, Malformed ), Printable( print )
-                     , Textual( textual ), fromString, parseText , toText )
+                     , Textual( textual ), fromString, parseText, toText )
 
 -- more-unicode ------------------------
 
@@ -51,7 +51,7 @@ import Number  ( ToNum( toNum, toNumW8, toNumW16 ), fromI, __fromI )
 
 -- parsec-plus -------------------------
 
-import ParsecPlus  ( Parsecable( parser ), parsec' )
+import ParsecPlus  ( Parsecable( parser ), ParseError, parsec )
 
 -- parser-plus -------------------------
 
@@ -75,7 +75,8 @@ import Test.Tasty.HUnit  ( (@=?), testCase )
 
 -- tasty-plus --------------------------
 
-import TastyPlus  ( (≟), propInvertibleText, runTestsP, runTestsReplay, runTestTree )
+import TastyPlus  ( (≟)
+                  , propInvertibleText, runTestsP, runTestsReplay, runTestTree )
 
 -- tasty-quickcheck --------------------
 
@@ -86,7 +87,8 @@ import Test.Tasty.QuickCheck  ( Arbitrary( arbitrary ), Gen
 
 import Language.Haskell.TH         ( Exp( AppE, ConE, LitE, TupE, VarE )
                                    , Lit( IntegerL ) )
-import Language.Haskell.TH.Syntax  ( Lift( lift ) )
+import Language.Haskell.TH.Syntax  ( Lift( lift, liftTyped ), TExp( TExp )
+                                   , liftCode )
 
 -- text --------------------------------
 
@@ -144,6 +146,8 @@ instance Lift DateImprecise where
                               return $ AppE (ConE 'DateMonth) (TupE [ Just y', Just m' ])
   lift (DateYear y) = do y' ← lift y
                          return $ AppE (ConE 'DateYear) y'
+
+  liftTyped d = liftCode $ TExp ⊳ lift d
 
 ----------------------------------------
 
@@ -240,7 +244,7 @@ parsecableTests =
       testDateImpreciseString  = "2019-11-14" ∷ String
       testDateImpreciseMString = "2019-11" ∷ String
       testDateImpreciseYString = "2019" ∷ String
-      check s d = testCase s $ Right d @=? parsec' @DateImprecise nn s
+      check s d = testCase s $ Right d @=? parsec @DateImprecise @ParseError nn s
    in testGroup "Parsecable"
                 [ check testDateImpreciseString  testDateImprecise
                 , check testDateImpreciseMString testDateImpreciseM

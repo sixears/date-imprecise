@@ -164,7 +164,7 @@ readYI = toInteger ∘ toNumW16 ⩺ readY
 dayOfMPat ∷ Integer → Pat
 -- λ> runQ [p| Month_ (W 1) |]
 -- ConP DateImprecise.Month.Month_ [ConP MInfo.BoundedN.W [LitP (IntegerL 1)]]
-dayOfMPat i = ConP 'DayOfM_ [ConP '𝕎 [LitP (IntegerL (i-1))]]
+dayOfMPat i = ConP 'DayOfM_ [] [ConP '𝕎 [] [LitP (IntegerL (i-1))]]
 
 dayOfMQQ ∷ String → Maybe ExpQ
 dayOfMQQ = (\ dom → ⟦dom⟧) ⩺ readY
@@ -180,15 +180,20 @@ dayOfM = mkQQ "DayOfM" $ def & exp ⊩ dayOfMQQ & pat ⊩ dayOfMQQP
 
 pattern DayOfM ∷ Integral α ⇒ α → DayOfM
 pattern DayOfM i ← ((+1) ∘ toNum ∘ unDayOfM → i)
+{-# COMPLETE DayOfM #-}
+
 -- not bi-directional, because DayOfM i would be partial (would fail on
 -- out-of-bounds values)
 --                  where DayOfM i = __fromI i
 {- | Short-name convenience alias for `pattern DayOfM` -}
 pattern DoM ∷ Integral α ⇒ α → DayOfM
 pattern DoM i ← ((+1) ∘ toNum ∘ unDayOfM → i)
+{-# COMPLETE DoM #-}
+
 {- | Short-name convenience alias for `pattern DayOfM` -}
 pattern D ∷ Integral α ⇒ α → DayOfM
 pattern D i ← ((+1) ∘ toNum ∘ unDayOfM → i)
+{-# COMPLETE D #-}
 
 dayOfMPatternTests ∷ TestTree
 dayOfMPatternTests =

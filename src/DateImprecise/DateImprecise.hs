@@ -106,11 +106,13 @@ dayDate = DateDay
 dateDay ∷ (AsDateError_ (Year,Month,DayOfM) ε, MonadError ε η) ⇒
           Year → Month → DayOfM → η DateImprecise
 dateDay y m d = let (y_,m_,d_) = (toNum y, toNum m, toNum d)
-                    result@(DateDay day) = dateDay_ y m d
-                    (y', m', d') = toGregorian day
-                 in if (y',m',d') ≡ (y_,m_,d_)
-                    then return result
-                    else badDateError (y,m,d)
+                    result = dateDay_ y m d
+                in  case result of
+                      DateDay day → let (y', m', d') = toGregorian day
+                                    in  if (y',m',d') ≡ (y_,m_,d_)
+                                        then return result
+                                        else badDateError (y,m,d)
+                      _           → badDateError (y,m,d)
 
 ----------
 

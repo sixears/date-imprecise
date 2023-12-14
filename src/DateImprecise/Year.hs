@@ -164,7 +164,7 @@ readYI = toInteger ∘ toNumW16 ⩺ readY
 yearPat ∷ Integer → Pat
 -- λ> runQ [p| Month_ (W 1) |]
 -- ConP DateImprecise.Month.Month_ [ConP MInfo.BoundedN.W [LitP (IntegerL 1)]]
-yearPat i = ConP 'Year_ [ConP '𝕎 [LitP (IntegerL (i-1900))]]
+yearPat i = ConP 'Year_ [] [ConP '𝕎 [] [LitP (IntegerL (i-1900))]]
 
 yearQQ ∷ String → Maybe ExpQ
 yearQQ = (\ y → ⟦y⟧) ⩺ readY
@@ -180,12 +180,15 @@ year = mkQQ "Year" $ def & exp ⊩ yearQQ & pat ⊩ yearQQP
 
 pattern Year ∷ Integral α ⇒ α → Year
 pattern Year i ← ((+1900) ∘ toNum ∘ unYear → i)
+{-# COMPLETE Year #-}
+
 -- not bi-directional, because Year i would be partial (would fail on
 -- out-of-bounds values)
 --                  where Year i = __fromI i
 {- | Short-name convenience alias for `pattern Year` -}
 pattern Y ∷ Integral α ⇒ α → Year
 pattern Y i ← ((+1900) ∘ toNum ∘ unYear → i)
+{-# COMPLETE Y #-}
 
 yearPatternTests ∷ TestTree
 yearPatternTests =
